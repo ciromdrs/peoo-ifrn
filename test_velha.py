@@ -92,12 +92,13 @@ class TestVelha(unittest.TestCase):
             with self.subTest(rotulo):
                 jogo = Velha()
                 jogo.tabuleiro = tabuleiro
+                inicio, incremento = verificacao
 
-                vencedor = jogo.verificar(*verificacao)
+                vencedor = jogo.verificar(inicio, incremento)
 
                 self.assertEqual(vencedor, esperado)
 
-    def test_verificar(self):
+    def test_verificar_vencedor(self):
         # Nome do subteste, tabuleiro, vencedor esperado
         data = [
             [

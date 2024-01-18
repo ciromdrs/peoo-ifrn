@@ -87,7 +87,6 @@ class Velha:
         return vencedor
 
 
-
-
-jogo = Velha()
-jogo.jogar()
+if __name__ == '__main__':
+    jogo = Velha()
+    jogo.jogar()
