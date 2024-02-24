@@ -10,8 +10,9 @@ class App(Tk):
 
         self.config = json.load(open(caminho_config))
 
-        # TODO: tornar tela scrollable
         self.title(self.config['titulo'])
+        # TODO: tornar tela scrollable
+        self.geometry("1024x600")
         row = 0
         botao_testar_todas = ttk.Button(self, text='Testar Todas')
         botao_testar_todas.pack(anchor='e', padx=20, pady=20)
@@ -21,26 +22,28 @@ class App(Tk):
         for dados in self.config['questoes']:
             desc = dados['descricao']
             script = dados['script']
-            params = dados['testes']
-            qw = QuestaoWidget(frame_questoes, descricao=desc, script=script, parametros=params)
-            qw.pack()
+            testes = dados['testes']
+            qw = QuestaoWidget(frame_questoes, descricao=desc, script=script, testes=testes)
+            qw.pack(pady=(10,0))
         
 
 class QuestaoWidget(ttk.Frame):
     comando = 'python %s %s' # Ex.: python q1.py 1 2 3
 
-    def __init__(self, parent=None, descricao='QuestaoWidget', script: str = 'q.py', parametros=[]):
+    def __init__(self, parent=None, descricao='QuestaoWidget', script: str = 'q.py', testes=[]):
         super().__init__(parent)
         self.script = script
         self.descricao = descricao
-        self.parametros = parametros
-        # Inicia a montagem da interface
+        self.testes = testes
+        # Personalização
+        self.configure(borderwidth=2, relief='groove')
+        # Montagem
         row = 0
         self._montar_primeira_linha(row)
         row += 1
         self._montar_cabecalhos(row)
         row += 1
-        self._montar_teste_personalizado(row)
+        # self._montar_executar(row)
         row += 1
         self._montar_testes(row)
     
@@ -55,9 +58,8 @@ class QuestaoWidget(ttk.Frame):
         self.label_comando.grid(column=0, row=row)
 
     def _montar_testes(self, row):
-        for p in self.parametros:
-            ttk.Entry(self, text=p, state='disabled').grid(column=0, row=row)
-            ttk.Label(self, text=self.comando % (self.script, p)).grid(column=1, row=row)
+        for p in self.testes:
+            ttk.Label(self, text=self.comando % (self.script, p)).grid(column=0, row=row)
             ttk.Button(self, text='Testar').grid(column=2, row=row)
             row += 1
 
