@@ -1,6 +1,6 @@
 import json
 
-from tkinter import Tk, StringVar, Canvas
+from tkinter import Tk
 from tkinter import ttk
 
 # Classes e funções auxiliares
