@@ -3,28 +3,12 @@
     "questoes" : [
         {
             "descricao" : "Questão 1",
+            "comando" : "python",
             "script" : "q1.py",
-            "testes" : ["p1 p2 p3", "p4 p5 p6"]
-        },
-        {
-            "descricao" : "Questão 2",
-            "script" : "q2.py",
-            "testes" : ["p1 p2 p3", "p4 p5 p6"]
-        },
-        {
-            "descricao" : "Questão 3",
-            "script" : "q3.py",
-            "testes" : ["p1 p2 p3", "p4 p5 p6"]
-        },
-        {
-            "descricao" : "Questão 4",
-            "script" : "q4.py",
-            "testes" : ["p1 p2 p3", "p4 p5 p6"]
-        },
-        {
-            "descricao" : "Questão 5",
-            "script" : "q5.py",
-            "testes" : ["p1 p2 p3", "p4 p5 p6"]
+            "testes" : [
+                ["", "testar_igual", "hello"],
+                ["", "testar_igual", "args"]
+            ]
         }
-    ]
+   ]
 }
