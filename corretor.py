@@ -44,12 +44,6 @@ class QuestaoWidget(ttk.Frame):
         row += 1
         self._montar_testes(row)
     
-    def _gerar_comando(self, *args):
-        '''Sincroniza o label dos parâmetros do teste personalizado com a entry.'''
-        novo = self.custom_params.get()
-        if novo:
-            self.label_custom_params.configure(text = self.comando % (self.script, novo))
-    
     def _montar_primeira_linha(self, row):
         self.label = ttk.Label(self, text=self.descricao)
         self.label.grid(column=0, row=row, columnspan=2, sticky='w')
@@ -57,18 +51,8 @@ class QuestaoWidget(ttk.Frame):
         self.botao_testar.grid(column=2, row=row)
 
     def _montar_cabecalhos(self, row):
-        self.label_parametros = ttk.Label(self, text='Parâmetros')
-        self.label_parametros.grid(column=0, row=row)
         self.label_comando = ttk.Label(self, text='Comando')
-        self.label_comando.grid(column=1, row=row)
-    
-    def _montar_teste_personalizado(self, row):
-        self.custom_params = StringVar()
-        self.custom_params.trace_add('write', self._gerar_comando)
-        ttk.Entry(self, textvariable=self.custom_params).grid(column=0, row=row)
-        self.label_custom_params = ttk.Label(self)
-        self.label_custom_params.grid(column=1, row=row)
-        ttk.Button(self, text='Testar').grid(column=2, row=row)
+        self.label_comando.grid(column=0, row=row)
 
     def _montar_testes(self, row):
         for p in self.parametros:
