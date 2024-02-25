@@ -1,6 +1,6 @@
 import json, subprocess, tkinter as tk
 
-from tkinter import ttk, scrolledtext
+from tkinter import ttk
 
 
 # CORREÇÃO DE QUESTÕES
@@ -102,7 +102,34 @@ def testar_igual(resultado: str, esperado: str) -> tuple[bool, str]:
 # Paddings tamanho P, M e G
 PADDING = 5
 
-class ScrolledFrame(tk.Frame):
+class ScrolledText(tk.Text):
+    """ScrolledText do tk.scrolledtext reimplementado com ttk.
+    (Copiado de https://github.com/python/cpython/blob/3.12/Lib/tkinter/scrolledtext.py)"""
+    def __init__(self, parent=None, **kw):
+        self.frame = ttk.Frame(parent)
+        self.vbar = ttk.Scrollbar(self.frame)
+        self.vbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        kw.update({'yscrollcommand': self.vbar.set})
+        tk.Text.__init__(self, self.frame, **kw)
+        self.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.vbar['command'] = self.yview
+
+        # Copy geometry methods of self.frame without overriding Text
+        # methods -- hack!
+        text_meths = vars(tk.Text).keys()
+        methods = vars(tk.Pack).keys() | vars(tk.Grid).keys() | vars(tk.Place).keys()
+        methods = methods.difference(text_meths)
+
+        for m in methods:
+            if m[0] != '_' and m != 'config' and m != 'configure':
+                setattr(self, m, getattr(self.frame, m))
+
+    def __str__(self):
+        return str(self.frame)
+
+
+class ScrolledFrame(ttk.Frame):
     '''Frame com scrollabar.
     *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` como `parent` do widget filho.'''
     def __init__(self, master, canvas_size: tuple[int,int] = (694, 2000), *args, **kwargs):
@@ -246,7 +273,7 @@ class TesteWidget(ttk.Frame):
         label_resultado.grid(column=0, row=row, sticky='w',
             padx=(PADDING*2, 0), pady=(0, PADDING))
         row += 1
-        self.text_resultado = scrolledtext.ScrolledText(self, wrap=tk.WORD, 
+        self.text_resultado = ScrolledText(self, wrap=tk.WORD, 
                                     width=80, height=8, state=tk.DISABLED)
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
             padx=(PADDING*2, 0), pady=(0, PADDING))
@@ -275,4 +302,10 @@ class TesteWidget(ttk.Frame):
 # PROGRAMA PRINCIPAL
 
 if __name__ == '__main__':
-    App('config.json').mainloop()
+    app = App('config.json')
+    style = ttk.Style(app)
+    temas = style.theme_names()
+    style.theme_use(temas[0])
+    app.mainloop()
+
+
