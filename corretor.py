@@ -94,21 +94,27 @@ PADDING_M = 10
 PADDING_G = 20
 
 class App(tk.Tk):
-    def __init__(self, caminho_config, *args, **kwargs):
+    '''Janela principal do corretor.'''
+
+    def __init__(self, caminho_config: str):
+        '''Construtor.
+        `caminho_config` é o caminho para o arquivo json de configuração da correção.'''
         super().__init__()
-
+        # Lê o arquivo de configuração
         self.config = json.load(open(caminho_config))
-
+        # Atribui o título da janela
         self.title(self.config['titulo'])
         # TODO: tornar tela scrollable
+        # Configura o tamanho da janela
         self.geometry("1024x600")
+        # O frame principal contém todos os elementos da tela
+        # Isso facilita o redimensionamento da janela sem alterar seu conteúdo
         frame_principal = ttk.Frame(self)
         frame_principal.pack()
-        row = 0
+        # Montagem da interface
         botao_testar_todas = ttk.Button(frame_principal, text='Testar Todas',
             command=self._testar_todas)
         botao_testar_todas.pack(anchor='e', padx=PADDING_G, pady=PADDING_G)
-        row += 1
         frame_questoes = ttk.Frame(frame_principal)
         frame_questoes.pack(padx=PADDING_G, pady=PADDING_G)
         self.widgets_questoes: list[QuestaoWidget] = []
@@ -123,14 +129,20 @@ class App(tk.Tk):
             self.widgets_questoes += [qw]
     
     def _testar_todas(self):
+        '''Testa todas as questões.'''
         for qw in self.widgets_questoes:
             qw._testar_questao()
         
 
 class QuestaoWidget(ttk.Frame):
-    comando = 'python %s %s' # Ex.: python q1.py 1 2 3
+    '''Widget de Questões.'''
 
     def __init__(self, parent, descricao: str, comando: str, script: str, testes: list):
+        '''Construtor.
+        Parâmetros:
+        - `parent` é o widget pai que conterá este.
+        TODO: Passar uma Questao em vez dos parâmetros separados.
+        - `descricao`, `comando`, `script` e `testes` são usados no construtor da `questao` que este widget mantém.'''
         super().__init__(parent)
         self.questao = Questao(descricao, comando, script, testes)
         self.widgets_testes = []
@@ -143,6 +155,7 @@ class QuestaoWidget(ttk.Frame):
         self._montar_testes()
     
     def _montar_primeira_linha(self, row):
+        '''Monta a primeira linha deste widget, que contém a descrição da questão e o botão para testar.'''
         self.label = ttk.Label(self, text=self.questao.descricao)
         self.label.grid(column=0, row=row, columnspan=2, sticky='w',
             padx=(PADDING_M, 0), pady=(PADDING_M, 0))
@@ -152,21 +165,30 @@ class QuestaoWidget(ttk.Frame):
             padx=(0, PADDING_M), pady=PADDING_M)
 
     def _montar_testes(self):
+        '''Monta o widget de cada teste.'''
         for p in self.questao.testes:
             tw = TesteWidget(self, p)
             tw.grid(padx=(0, PADDING_M), pady=(0, PADDING_P))
             self.widgets_testes += [tw]
     
     def _testar_questao(self):
+        '''Executa todos os testes da questão.'''
         for tw in self.widgets_testes:
             tw._testar()
 
 
 class TesteWidget(ttk.Frame):
+    '''Widget do Teste.'''
+
     def __init__(self, parent, teste: Teste):
+        '''Construtor.
+        Parâmetros:
+        - `parent` é o widget pai que conterá este.
+        - `teste` é o teste correspondente.'''
         super().__init__(parent)
         self.teste = teste
         # Montagem
+        # O teste é montado como grid. A variável `row` serve para controlar as linhas.
         row = 0
         self.label_comando = ttk.Label(self, text=f'Comando: {teste.comando_completo}')
         self.label_comando.grid(column=0, row=row, sticky='w',
@@ -185,6 +207,7 @@ class TesteWidget(ttk.Frame):
             padx=(PADDING_M, 0), pady=(0, PADDING_P))
 
     def _testar(self):
+        '''Executa o teste e atualiza a interface com o resultado.'''
         text = self.text_resultado
         text.configure(state=tk.NORMAL)
         text.delete(1.0, 'end')
