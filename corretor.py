@@ -126,8 +126,12 @@ class App(tk.Tk):
         botao_testar_todas = ttk.Button(frame_principal, text='Testar Todas',
             command=self._testar_todas)
         botao_testar_todas.pack(anchor='e', padx=PADDING_G, pady=PADDING_G)
-        frame_questoes = ttk.Frame(frame_principal)
-        frame_questoes.pack(padx=PADDING_G, pady=PADDING_G)
+        self.frame_questoes = ttk.Frame(frame_principal)
+        self.frame_questoes.pack(padx=PADDING_G, pady=PADDING_G)
+        self._montar_questoes()
+    
+    def _montar_questoes(self):
+        '''Monta os widgets das questões'''
         self.widgets_questoes: list[QuestaoWidget] = []
         for dados in self.config['questoes']:
             desc = dados['descricao']
@@ -136,10 +140,10 @@ class App(tk.Tk):
             testes = dados['testes']
             questao = Questao(descricao=desc, comando=comando, script=script,
                 testes=testes)
-            qw = QuestaoWidget(frame_questoes, questao)
+            qw = QuestaoWidget(self.frame_questoes, questao)
             qw.pack(pady=PADDING_M)
             self.widgets_questoes += [qw]
-    
+
     def _testar_todas(self):
         '''Testa todas as questões.'''
         for qw in self.widgets_questoes:
