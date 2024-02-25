@@ -123,8 +123,9 @@ class App(tk.Tk):
             comando = dados['comando']
             script = dados['script']
             testes = dados['testes']
-            qw = QuestaoWidget(frame_questoes, descricao=desc,
-                comando=comando, script=script, testes=testes)
+            questao = Questao(descricao=desc, comando=comando, script=script,
+                testes=testes)
+            qw = QuestaoWidget(frame_questoes, questao)
             qw.pack(pady=PADDING_M)
             self.widgets_questoes += [qw]
     
@@ -137,14 +138,13 @@ class App(tk.Tk):
 class QuestaoWidget(ttk.Frame):
     '''Widget de Questões.'''
 
-    def __init__(self, parent, descricao: str, comando: str, script: str, testes: list):
+    def __init__(self, parent, questao: Questao):
         '''Construtor.
         Parâmetros:
         - `parent` é o widget pai que conterá este.
-        TODO: Passar uma Questao em vez dos parâmetros separados.
-        - `descricao`, `comando`, `script` e `testes` são usados no construtor da `questao` que este widget mantém.'''
+        - `questao` é a questão correspondente.'''
         super().__init__(parent)
-        self.questao = Questao(descricao, comando, script, testes)
+        self.questao = questao
         self.widgets_testes = []
         # Personalização
         self.configure(borderwidth=2, relief=tk.GROOVE)
