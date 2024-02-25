@@ -13,27 +13,27 @@ TIMEOUT = 2
 class Questao:
     '''Uma questão para corrigir.'''
 
-    def __init__(self, descricao: str, comando: str, script: str, testes: list):
+    def __init__(self, descricao: str, comando: str, script: str, correcoes: list):
         '''Construtor.
 
         Parâmetros:
         - `descricao` é uma descrição da questão.
         - `comando` é o comando do terminal para executar o script da resposta.
         - `script` é o script da resposta.
-        - `testes` são os argumentos e verificações da saída do script para corrigir a questão.
+        - `correcoes` são os argumentos e verificações da saída do script para corrigir a questão.
         '''
         self.descricao = descricao
         self.script = script
-        self.testes = testes
-        # Converte os testes em objetos Teste
-        self.testes = []
-        for args_script, func_expect, args_expect in testes:
-            self.testes += [
-                Teste(comando, script, args_script, func_expect, args_expect)]
+        self.correcoes = correcoes
+        # Converte as correcoes em objetos Correcao
+        self.correcoes = []
+        for args_script, func_expect, args_expect in correcoes:
+            self.correcoes += [
+                Correcao(comando, script, args_script, func_expect, args_expect)]
 
 
-class Teste:
-    '''Um teste de uma questão.'''
+class Correcao:
+    '''Uma correcao de uma questão.'''
 
     def __init__(self, comando: str, script: str, args: str, func_expect, args_expect: list):
         '''Construtor.
@@ -58,8 +58,8 @@ class Teste:
             c += f' {self.args}'
         return c
 
-    def testar(self) -> tuple[int, str, str]:
-        '''Executa o teste e retorna o código de saída, a saída e o erro.'''
+    def corrigir(self) -> tuple[int, str, str]:
+        '''Executa a correcao e retorna o código de saída, a saída e o erro.'''
         codigo = -1
         resposta = 'Não executado\n'
         erro = 'Não executado\n'
@@ -84,7 +84,7 @@ class Teste:
         return codigo, resposta, erro
 
 
-# Funções de teste
+# Funções de correcao
 
 def testar_igual(resultado: str, esperado: str) -> tuple[bool, str]:
     '''Verifica se o `resultado` é igual ao `esperado`.'''
@@ -174,7 +174,7 @@ class App(tk.Tk):
         # Lê o arquivo de configuração
         self.config = json.load(open(caminho_config))
         # Atribui o título da janela
-        self.title(self.config['titulo'])
+        self.title(f"Corretor Automático - {self.config['titulo']}")
         # Configura o tamanho da janela
         self.geometry("1024x600")
         # Montagem da interface
@@ -184,9 +184,9 @@ class App(tk.Tk):
         frame_principal.pack(expand=True, fill=tk.BOTH)
         frame_topo = ttk.Frame(frame_principal, borderwidth=2, relief=tk.GROOVE)
         frame_topo.pack(fill=tk.BOTH, pady=(0,PADDING))
-        botao_testar_todas = ttk.Button(frame_topo, text='Testar Todas',
-            command=self._testar_todas)
-        botao_testar_todas.pack(padx=PADDING*4, pady=PADDING*4)
+        botao_corrigir_todas = ttk.Button(frame_topo, text='Corrigir Todas',
+            command=self._corrigir_todas)
+        botao_corrigir_todas.pack(padx=PADDING*4, pady=PADDING*4)
         self.frame_questoes = ScrolledFrame(frame_principal)
         self.frame_questoes.pack(fill=tk.BOTH)
         self._montar_questoes()
@@ -198,17 +198,17 @@ class App(tk.Tk):
             desc = dados['descricao']
             comando = dados['comando']
             script = dados['script']
-            testes = dados['testes']
+            correcoes = dados['correcoes']
             questao = Questao(descricao=desc, comando=comando, script=script,
-                testes=testes)
+                correcoes=correcoes)
             qw = QuestaoWidget(self.frame_questoes.conteudo, questao)
             qw.pack(pady=(0,PADDING))
             self.widgets_questoes += [qw]
 
-    def _testar_todas(self):
+    def _corrigir_todas(self):
         '''Testa todas as questões.'''
         for qw in self.widgets_questoes:
-            qw._testar_questao()
+            qw._corrigir_questao()
         
 
 class QuestaoWidget(ttk.Frame):
@@ -221,56 +221,56 @@ class QuestaoWidget(ttk.Frame):
         - `questao` é a questão correspondente.'''
         super().__init__(parent)
         self.questao: Questao = questao
-        self.widgets_testes: list[TesteWidget] = []
+        self.widgets_correcoes: list[CorrecaoWidget] = []
         # Personalização
         self.configure(borderwidth=2, relief=tk.GROOVE)
         # Montagem
         row = 0
         self._montar_primeira_linha(row)
         row += 1
-        self._montar_testes()
+        self._montar_correcoes()
     
     def _montar_primeira_linha(self, row):
-        '''Monta a primeira linha deste widget, que contém a descrição da questão e o botão para testar.'''
+        '''Monta a primeira linha deste widget, que contém a descrição da questão e o botão para corrigir.'''
         self.label = ttk.Label(self, text=self.questao.descricao)
         self.label.grid(column=0, row=row, columnspan=2, sticky='w',
             padx=(PADDING*2, 0), pady=(PADDING*2, 0))
-        self.botao_testar = ttk.Button(self, text='Testar Questão',
-            command=self._testar_questao)
-        self.botao_testar.grid(row=row, sticky='e', 
+        self.botao_corrigir = ttk.Button(self, text='Corrigir Questão',
+            command=self._corrigir_questao)
+        self.botao_corrigir.grid(row=row, sticky='e', 
             padx=(0, PADDING*2), pady=PADDING*2)
 
-    def _montar_testes(self):
-        '''Monta o widget de cada teste.'''
-        for p in self.questao.testes:
-            tw = TesteWidget(self, p)
+    def _montar_correcoes(self):
+        '''Monta o widget de cada correção.'''
+        for p in self.questao.correcoes:
+            tw = CorrecaoWidget(self, p)
             tw.grid(padx=PADDING*2, pady=(0, PADDING))
-            self.widgets_testes += [tw]
+            self.widgets_correcoes += [tw]
     
-    def _testar_questao(self):
-        '''Executa todos os testes da questão.'''
-        for tw in self.widgets_testes:
-            tw._testar()
+    def _corrigir_questao(self):
+        '''Executa todas as correcoes da questão.'''
+        for tw in self.widgets_correcoes:
+            tw._corrigir()
 
 
-class TesteWidget(ttk.Frame):
-    '''Widget do Teste.'''
+class CorrecaoWidget(ttk.Frame):
+    '''Widget da Correcao.'''
 
-    def __init__(self, parent, teste: Teste):
+    def __init__(self, parent, correcao: Correcao):
         '''Construtor.
         Parâmetros:
         - `parent` é o widget pai que conterá este.
-        - `teste` é o teste correspondente.'''
+        - `correcao` é a correcao correspondente.'''
         super().__init__(parent)
-        self.teste: Teste = teste
+        self.correcao: Correcao = correcao
         # Montagem
-        # O teste é montado como grid. A variável `row` serve para controlar as linhas.
+        # A correção é montada como grid. A variável `row` serve para controlar as linhas.
         row = 0
-        self.label_comando = ttk.Label(self, text=f'Comando: {teste.comando_completo}')
+        self.label_comando = ttk.Label(self, text=f'Comando: {correcao.comando_completo}')
         self.label_comando.grid(column=0, row=row, sticky='w',
             padx=(PADDING*2, 0), pady=(0, PADDING))
-        self.botao_testar = ttk.Button(self, text='Testar', command=self._testar)
-        self.botao_testar.grid(column=1, row=row, sticky='e',
+        self.botao_corrigir = ttk.Button(self, text='Corrigir', command=self._corrigir)
+        self.botao_corrigir.grid(column=1, row=row, sticky='e',
             pady=(0, PADDING))
         row += 1
         label_resultado = ttk.Label(self, text=f'Resultado:')
@@ -282,16 +282,16 @@ class TesteWidget(ttk.Frame):
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
             padx=(PADDING*2, 0), pady=(0, PADDING))
 
-    def _testar(self):
-        '''Executa o teste e atualiza a interface com o resultado.'''
+    def _corrigir(self):
+        '''Executa a correcao e atualiza a interface com o resultado.'''
         text = self.text_resultado
         # Habilita a caixa de texto para edição
         text.configure(state=tk.NORMAL)
         # Limpa o texto
         text.delete(1.0, 'end')
-        codigo, saida, erro = self.teste.testar()
+        codigo, saida, erro = self.correcao.corrigir()
         if saida == '': saida = '\n'
-        # Preenche com o resultado do teste
+        # Preenche com o resultado da correcao
         text.insert('end', f'Código: {codigo}')
         text.insert('end', f'\nSaída: {saida}')
         if erro:
