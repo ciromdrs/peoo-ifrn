@@ -74,11 +74,10 @@ class Teste():
 
 # Funções de teste
 
-def testar_igual(resultado: str, esperado: str,
-    modificadores = [lambda x: x.strip("\n\r\t ")]) -> tuple[bool, str]:
-    for m in modificadores:
-        resultado = m(resultado)
-        esperado = m(esperado)
+def testar_igual(resultado: str, esperado: str) -> tuple[bool, str]:
+    '''Verifica se o `resultado` é igual ao `esperado`.'''
+    resultado = resultado.strip("\n\r\t ")
+    esperado = esperado.strip("\n\r\t ")
     if resultado != esperado:
         erro = f"Esperava '{esperado}', recebeu '{resultado}'"
         return False, erro
