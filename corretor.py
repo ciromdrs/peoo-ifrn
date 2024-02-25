@@ -85,12 +85,14 @@ class App(tk.Tk):
         self.title(self.config['titulo'])
         # TODO: tornar tela scrollable
         self.geometry("1024x600")
+        frame_principal = ttk.Frame(self)
+        frame_principal.pack()
         row = 0
-        botao_testar_todas = ttk.Button(self, text='Testar Todas',
+        botao_testar_todas = ttk.Button(frame_principal, text='Testar Todas',
             command=self._testar_todas)
         botao_testar_todas.pack(anchor='e', padx=PADDING_G, pady=PADDING_G)
         row += 1
-        frame_questoes = ttk.Frame(self)
+        frame_questoes = ttk.Frame(frame_principal)
         frame_questoes.pack(padx=PADDING_G, pady=PADDING_G)
         self.widgets_questoes: list[QuestaoWidget] = []
         for dados in self.config['questoes']:
