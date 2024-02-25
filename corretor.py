@@ -60,8 +60,8 @@ class Teste:
 
     def testar(self) -> tuple[int, str, str]:
         '''Executa o teste e retorna o código de saída, a saída e o erro.'''
-        codigo: int = -1
-        resposta: str = 'Não executado\n'
+        codigo = -1
+        resposta = 'Não executado\n'
         erro = 'Não executado\n'
         try:
             processo = subprocess.run(
@@ -155,8 +155,8 @@ class QuestaoWidget(ttk.Frame):
         - `parent` é o widget pai que conterá este.
         - `questao` é a questão correspondente.'''
         super().__init__(parent)
-        self.questao = questao
-        self.widgets_testes = []
+        self.questao: Questao = questao
+        self.widgets_testes: list[TesteWidget] = []
         # Personalização
         self.configure(borderwidth=2, relief=tk.GROOVE)
         # Montagem
@@ -197,7 +197,7 @@ class TesteWidget(ttk.Frame):
         - `parent` é o widget pai que conterá este.
         - `teste` é o teste correspondente.'''
         super().__init__(parent)
-        self.teste = teste
+        self.teste: Teste = teste
         # Montagem
         # O teste é montado como grid. A variável `row` serve para controlar as linhas.
         row = 0
@@ -220,15 +220,20 @@ class TesteWidget(ttk.Frame):
     def _testar(self):
         '''Executa o teste e atualiza a interface com o resultado.'''
         text = self.text_resultado
+        # Habilita a caixa de texto para edição
         text.configure(state=tk.NORMAL)
+        # Limpa o texto
         text.delete(1.0, 'end')
         codigo, saida, erro = self.teste.testar()
         if saida == '': saida = '\n'
+        # Preenche com o resultado do teste
         text.insert('end', f'Código: {codigo}')
         text.insert('end', f'\nSaída: {saida}')
         if erro:
             text.insert('end', f'Erro: {erro}')
+        # Desabilita a edição
         text.configure(state=tk.DISABLED)
+        # Atualiza a interface
         root = self.winfo_toplevel()
         root.update()
         root.update_idletasks()
