@@ -50,10 +50,8 @@ class Teste():
         if codigo == 0: # O script funcionou
             # Verifica a resposta
             _, erro = eval(self.func_expect)(resposta, self.args_expect)
-        elif codigo == 256: # File not found # 512 também é no Linux
+        elif codigo == 2: # File not found
             erro = f'Arquivo {self.script} não encontrado.'
-        else:
-            erro = f"Erro {codigo}:\n{erro}"
         return codigo, resposta, erro
 
 
