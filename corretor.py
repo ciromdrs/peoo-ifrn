@@ -104,6 +104,40 @@ PADDING_P = 5
 PADDING_M = 10
 PADDING_G = 20
 
+
+class ScrolledFrame(tk.Frame):
+    '''Frame com scrollabar.
+    *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` como `parent` do widget filho.'''
+    def __init__(self, master, canvas_size: tuple[int,int] = (2000,694), *args, **kwargs):
+        tk.Frame.__init__(self, master, *args, **kwargs)
+
+        # Na raiz, é necessário um Canvas e a Scrollbar
+        canvas = tk.Canvas(self, height=canvas_size[0], width=canvas_size[1])
+        scrollbar = ttk.Scrollbar(self, command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        # Dentro do canvas, é necessário um Frame
+        conteudo = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=conteudo, anchor="nw")
+        # Configura o Canvas para atualizar a scrollbar quando o tamanho muda
+        conteudo.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        # Habilita o mouse wheel
+        canvas.bind_all("<Button-4>", self._on_mousewheel_up)
+        canvas.bind_all("<Button-5>", self._on_mousewheel_down)
+
+        self.canvas = canvas
+        self.conteudo = conteudo
+
+    def _on_mousewheel_up(self, event):
+        '''Sobe a view do `self.canvas`.'''
+        self.canvas.yview_scroll(-1, "units")
+
+    def _on_mousewheel_down(self, event):
+        '''Desce a view do `self.canvas`.'''
+        self.canvas.yview_scroll(1, "units")
+
+
 class App(tk.Tk):
     '''Janela principal do corretor.'''
 
@@ -115,7 +149,6 @@ class App(tk.Tk):
         self.config = json.load(open(caminho_config))
         # Atribui o título da janela
         self.title(self.config['titulo'])
-        # TODO: tornar tela scrollable
         # Configura o tamanho da janela
         self.geometry("1024x600")
         # O frame principal contém todos os elementos da tela
@@ -126,8 +159,8 @@ class App(tk.Tk):
         botao_testar_todas = ttk.Button(frame_principal, text='Testar Todas',
             command=self._testar_todas)
         botao_testar_todas.pack(anchor='e', padx=PADDING_G, pady=PADDING_G)
-        self.frame_questoes = ttk.Frame(frame_principal)
-        self.frame_questoes.pack(padx=PADDING_G, pady=PADDING_G)
+        self.frame_questoes = ScrolledFrame(self, borderwidth=2, relief=tk.GROOVE)
+        self.frame_questoes.pack()
         self._montar_questoes()
     
     def _montar_questoes(self):
@@ -140,8 +173,8 @@ class App(tk.Tk):
             testes = dados['testes']
             questao = Questao(descricao=desc, comando=comando, script=script,
                 testes=testes)
-            qw = QuestaoWidget(self.frame_questoes, questao)
-            qw.pack(pady=PADDING_M)
+            qw = QuestaoWidget(self.frame_questoes.conteudo, questao)
+            qw.pack()
             self.widgets_questoes += [qw]
 
     def _testar_todas(self):
@@ -183,7 +216,7 @@ class QuestaoWidget(ttk.Frame):
         '''Monta o widget de cada teste.'''
         for p in self.questao.testes:
             tw = TesteWidget(self, p)
-            tw.grid(padx=(0, PADDING_M), pady=(0, PADDING_P))
+            tw.grid(padx=PADDING_M, pady=(0, PADDING_P))
             self.widgets_testes += [tw]
     
     def _testar_questao(self):
