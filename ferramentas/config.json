@@ -1,0 +1,30 @@
+{
+    "titulo" : "Atividade 1",
+    "questoes" : [
+        {
+            "descricao" : "Questão 1",
+            "comando" : "python",
+            "script" : "q1.py",
+            "correcoes" : [
+                ["hello", "testar_igual", "hello"],
+                ["", "testar_igual", "args"]
+            ]
+        },
+        {
+            "descricao" : "Questão 2",
+            "comando" : "python",
+            "script" : "q2.py",
+            "correcoes" : [
+                ["", "testar_igual", "args"]
+            ]
+        },
+        {
+            "descricao" : "Questão 3",
+            "comando" : "python",
+            "script" : "q3.py",
+            "correcoes" : [
+                ["", "testar_igual", "args"]
+            ]
+        }
+   ]
+}
