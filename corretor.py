@@ -105,11 +105,11 @@ PADDING = 5
 class ScrolledFrame(tk.Frame):
     '''Frame com scrollabar.
     *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` como `parent` do widget filho.'''
-    def __init__(self, master, canvas_size: tuple[int,int] = (2000,694), *args, **kwargs):
+    def __init__(self, master, canvas_size: tuple[int,int] = (694, 2000), *args, **kwargs):
         tk.Frame.__init__(self, master, *args, **kwargs)
 
         # Na raiz, é necessário um Canvas e a Scrollbar
-        canvas = tk.Canvas(self, height=canvas_size[0], width=canvas_size[1])
+        canvas = tk.Canvas(self, width=canvas_size[0], height=canvas_size[1])
         scrollbar = ttk.Scrollbar(self, command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
         canvas.pack(side="left", fill="both", expand=True)
