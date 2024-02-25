@@ -101,6 +101,7 @@ def testar_igual(resultado: str, esperado: str) -> tuple[bool, str]:
 # Constantes
 # Paddings tamanho P, M e G
 PADDING = 5
+LARGURA_WIDGET_QUESTAO = 694
 
 class ScrolledText(tk.Text):
     """ScrolledText do tk.scrolledtext reimplementado com ttk.
@@ -132,18 +133,19 @@ class ScrolledText(tk.Text):
 class ScrolledFrame(ttk.Frame):
     '''Frame com scrollabar.
     *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` como `parent` do widget filho.'''
-    def __init__(self, master, canvas_size: tuple[int,int] = (694, 2000), *args, **kwargs):
-        tk.Frame.__init__(self, master, *args, **kwargs)
+    def __init__(self, parent, height: int = 940, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
 
         # Na raiz, é necessário um Canvas e a Scrollbar
-        canvas = tk.Canvas(self, width=canvas_size[0], height=canvas_size[1])
+        canvas = tk.Canvas(self, height=height, width=LARGURA_WIDGET_QUESTAO)
         scrollbar = ttk.Scrollbar(self, command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
+        canvas.pack(anchor='center',side="left", expand=True)
         scrollbar.pack(side="right", fill="y")
         # Dentro do canvas, é necessário um Frame
         conteudo = ttk.Frame(canvas)
-        canvas.create_window((0, 0), window=conteudo, anchor="nw")
+        posx = parent.winfo_width() / 2
+        canvas.create_window((posx, 0), window=conteudo, anchor="nw")
         # Configura o Canvas para atualizar a scrollbar quando o tamanho muda
         conteudo.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         # Habilita o mouse wheel
@@ -175,16 +177,18 @@ class App(tk.Tk):
         self.title(self.config['titulo'])
         # Configura o tamanho da janela
         self.geometry("1024x600")
+        # Montagem da interface
         # O frame principal contém todos os elementos da tela
         # Isso facilita o redimensionamento da janela sem alterar seu conteúdo
         frame_principal = ttk.Frame(self)
-        frame_principal.pack()
-        # Montagem da interface
-        botao_testar_todas = ttk.Button(frame_principal, text='Testar Todas',
+        frame_principal.pack(expand=True, fill=tk.BOTH)
+        frame_topo = ttk.Frame(frame_principal, borderwidth=2, relief=tk.GROOVE)
+        frame_topo.pack(fill=tk.BOTH, pady=(0,PADDING))
+        botao_testar_todas = ttk.Button(frame_topo, text='Testar Todas',
             command=self._testar_todas)
-        botao_testar_todas.pack(anchor='e', padx=PADDING*4, pady=PADDING*4)
-        self.frame_questoes = ScrolledFrame(self, borderwidth=2, relief=tk.GROOVE)
-        self.frame_questoes.pack()
+        botao_testar_todas.pack(padx=PADDING*4, pady=PADDING*4)
+        self.frame_questoes = ScrolledFrame(frame_principal)
+        self.frame_questoes.pack(fill=tk.BOTH)
         self._montar_questoes()
     
     def _montar_questoes(self):
@@ -198,7 +202,7 @@ class App(tk.Tk):
             questao = Questao(descricao=desc, comando=comando, script=script,
                 testes=testes)
             qw = QuestaoWidget(self.frame_questoes.conteudo, questao)
-            qw.pack()
+            qw.pack(pady=(0,PADDING))
             self.widgets_questoes += [qw]
 
     def _testar_todas(self):
