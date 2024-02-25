@@ -172,6 +172,7 @@ class TesteWidget(ttk.Frame):
         text.configure(state=tk.NORMAL)
         text.delete(1.0, 'end')
         codigo, saida, erro = self.teste.testar()
+        if saida == '': saida = '\n'
         text.insert('end', f'Código: {codigo}')
         text.insert('end', f'\nSaída: {saida}')
         if erro:
