@@ -3,7 +3,12 @@ import json, subprocess, tkinter as tk
 from tkinter import ttk, scrolledtext
 
 
-# FUNÇÕES DE CORREÇÃO DE QUESTÕES
+# CORREÇÃO DE QUESTÕES
+
+# Constantes
+TIMEOUT = 2
+
+# Classes
 
 class Questao:
     def __init__(self, descricao: str, comando: str, script: str, testes: list):
@@ -42,10 +47,22 @@ class Teste():
         return c
 
     def testar(self) -> tuple[int, str, str]:
-        processo = subprocess.run([self.comando, self.script, self.args], capture_output=True)
-        codigo = processo.returncode
-        resposta = processo.stdout.decode()
-        erro = processo.stderr.decode()
+        codigo: int = -1
+        resposta: str = 'Não executado\n'
+        erro = 'Não executado\n'
+        try:
+            processo = subprocess.run(
+                [self.comando, self.script, self.args],
+                capture_output=True,
+                timeout=TIMEOUT)
+            codigo = processo.returncode
+            resposta = processo.stdout.decode()
+            erro = processo.stderr.decode()
+        except subprocess.TimeoutExpired as e:
+            codigo = 1
+            resposta = e.stdout.decode() if e.stdout else '\n'
+            erro = f'Timeout de {TIMEOUT}s expirado.'
+        
         # TODO: Revisar os códigos de erro no Windows e Linux
         if codigo == 0: # O script funcionou
             # Verifica a resposta
@@ -178,6 +195,9 @@ class TesteWidget(ttk.Frame):
         if erro:
             text.insert('end', f'Erro: {erro}')
         text.configure(state=tk.DISABLED)
+        root = self.winfo_toplevel()
+        root.update()
+        root.update_idletasks()
 
 # PROGRAMA PRINCIPAL
 
