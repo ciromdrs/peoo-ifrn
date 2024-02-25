@@ -11,28 +11,39 @@ TIMEOUT = 2
 # Classes
 
 class Questao:
+    '''Uma questão para corrigir.'''
+
     def __init__(self, descricao: str, comando: str, script: str, testes: list):
+        '''Construtor.
+
+        Parâmetros:
+        - `descricao` é uma descrição da questão.
+        - `comando` é o comando do terminal para executar o script da resposta.
+        - `script` é o script da resposta.
+        - `testes` são os argumentos e verificações da saída do script para corrigir a questão.
+        '''
         self.descricao = descricao
         self.script = script
         self.testes = testes
-
         # Converte os testes em objetos Teste
         self.testes = []
         for args_script, func_expect, args_expect in testes:
             self.testes += [
                 Teste(comando, script, args_script, func_expect, args_expect)]
 
-    def corrigir(self):
-        # Executa os testes, conta acertos e exibe erros
-        for t in self.testes:
-            codigo, saida, erro = t.testar()
-            if erro:
-                return erro
-        return
 
+class Teste:
+    '''Um teste de uma questão.'''
 
-class Teste():
     def __init__(self, comando: str, script: str, args: str, func_expect, args_expect: list):
+        '''Construtor.
+        
+        Parâmetros:
+        - `comando` é o comando do terminal para executar o script da resposta.
+        - `script` é o script da resposta.
+        - `args` são os argumentos do script.
+        - `func_expect` é a função que verifica a saída do script.
+        - `args_expect` são os argumentos da função que verifica a saída do script.'''
         self.comando = comando
         self.script = script
         self.args = args
@@ -40,13 +51,15 @@ class Teste():
         self.args_expect = args_expect
 
     @property
-    def comando_completo(self):
+    def comando_completo(self) -> str:
+        '''Retorna o comando para executar o script, incluindo o comando do terminal, script e argumentos.'''
         c = f'{self.comando} {self.script}'
         if self.args:
             c += f' {self.args}'
         return c
 
     def testar(self) -> tuple[int, str, str]:
+        '''Executa o teste e retorna o código de saída, a saída e o erro.'''
         codigo: int = -1
         resposta: str = 'Não executado\n'
         erro = 'Não executado\n'
@@ -62,7 +75,6 @@ class Teste():
             codigo = 1
             resposta = e.stdout.decode() if e.stdout else '\n'
             erro = f'Timeout de {TIMEOUT}s expirado.'
-        
         # TODO: Revisar os códigos de erro no Windows e Linux
         if codigo == 0: # O script funcionou
             # Verifica a resposta
