@@ -100,10 +100,7 @@ def testar_igual(resultado: str, esperado: str) -> tuple[bool, str]:
 
 # Constantes
 # Paddings tamanho P, M e G
-PADDING_P = 5
-PADDING_M = 10
-PADDING_G = 20
-
+PADDING = 5
 
 class ScrolledFrame(tk.Frame):
     '''Frame com scrollabar.
@@ -158,7 +155,7 @@ class App(tk.Tk):
         # Montagem da interface
         botao_testar_todas = ttk.Button(frame_principal, text='Testar Todas',
             command=self._testar_todas)
-        botao_testar_todas.pack(anchor='e', padx=PADDING_G, pady=PADDING_G)
+        botao_testar_todas.pack(anchor='e', padx=PADDING*4, pady=PADDING*4)
         self.frame_questoes = ScrolledFrame(self, borderwidth=2, relief=tk.GROOVE)
         self.frame_questoes.pack()
         self._montar_questoes()
@@ -206,17 +203,17 @@ class QuestaoWidget(ttk.Frame):
         '''Monta a primeira linha deste widget, que contém a descrição da questão e o botão para testar.'''
         self.label = ttk.Label(self, text=self.questao.descricao)
         self.label.grid(column=0, row=row, columnspan=2, sticky='w',
-            padx=(PADDING_M, 0), pady=(PADDING_M, 0))
+            padx=(PADDING*2, 0), pady=(PADDING*2, 0))
         self.botao_testar = ttk.Button(self, text='Testar Questão',
             command=self._testar_questao)
         self.botao_testar.grid(row=row, sticky='e', 
-            padx=(0, PADDING_M), pady=PADDING_M)
+            padx=(0, PADDING*2), pady=PADDING*2)
 
     def _montar_testes(self):
         '''Monta o widget de cada teste.'''
         for p in self.questao.testes:
             tw = TesteWidget(self, p)
-            tw.grid(padx=PADDING_M, pady=(0, PADDING_P))
+            tw.grid(padx=PADDING*2, pady=(0, PADDING))
             self.widgets_testes += [tw]
     
     def _testar_questao(self):
@@ -240,19 +237,19 @@ class TesteWidget(ttk.Frame):
         row = 0
         self.label_comando = ttk.Label(self, text=f'Comando: {teste.comando_completo}')
         self.label_comando.grid(column=0, row=row, sticky='w',
-            padx=(PADDING_M, 0), pady=(0, PADDING_P))
+            padx=(PADDING*2, 0), pady=(0, PADDING))
         self.botao_testar = ttk.Button(self, text='Testar', command=self._testar)
         self.botao_testar.grid(column=1, row=row, sticky='e',
-            pady=(0, PADDING_P))
+            pady=(0, PADDING))
         row += 1
         label_resultado = ttk.Label(self, text=f'Resultado:')
         label_resultado.grid(column=0, row=row, sticky='w',
-            padx=(PADDING_M, 0), pady=(0, PADDING_P))
+            padx=(PADDING*2, 0), pady=(0, PADDING))
         row += 1
         self.text_resultado = scrolledtext.ScrolledText(self, wrap=tk.WORD, 
                                     width=80, height=8, state=tk.DISABLED)
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
-            padx=(PADDING_M, 0), pady=(0, PADDING_P))
+            padx=(PADDING*2, 0), pady=(0, PADDING))
 
     def _testar(self):
         '''Executa o teste e atualiza a interface com o resultado.'''
