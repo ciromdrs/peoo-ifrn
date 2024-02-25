@@ -20,7 +20,7 @@ class Questao:
     def corrigir(self):
         # Executa os testes, conta acertos e exibe erros
         for t in self.testes:
-            erro = t.testar()
+            codigo, saida, erro = t.testar()
             if erro:
                 return erro
         return
@@ -36,12 +36,12 @@ class Teste():
 
     @property
     def comando_completo(self):
-        c = f' {self.script}'
+        c = f'{self.comando} {self.script}'
         if self.args:
             c += f' {self.args}'
         return c
 
-    def testar(self) -> str:
+    def testar(self) -> tuple[int, str, str]:
         processo = subprocess.run([self.comando, self.script, self.args], capture_output=True)
         codigo = processo.returncode
         resposta = processo.stdout.decode()
@@ -49,14 +49,12 @@ class Teste():
         # TODO: Revisar os códigos de erro no Windows e Linux
         if codigo == 0: # O script funcionou
             # Verifica a resposta
-            ok, erro = eval(self.func_expect)(resposta, self.args_expect)
-            if not ok:
-                return erro
-            return None
+            _, erro = eval(self.func_expect)(resposta, self.args_expect)
         elif codigo == 256: # File not found # 512 também é no Linux
-            return f'Arquivo {self.script} não encontrado.'
+            erro = f'Arquivo {self.script} não encontrado.'
         else:
-            return f"Erro {codigo}:\n{erro}"
+            erro = f"Erro {codigo}:\n{erro}"
+        return codigo, resposta, erro
 
 
 # Funções de teste
@@ -150,6 +148,10 @@ class TesteWidget(ttk.Frame):
         self.botao_testar.grid(column=1, row=row, sticky='e',
             pady=(0, PADDING_P))
         row += 1
+        label_resultado = ttk.Label(self, text=f'Resultado:')
+        label_resultado.grid(column=0, row=row, sticky='w',
+            padx=(PADDING_M, 0), pady=(0, PADDING_P))
+        row += 1
         self.text_resultado = scrolledtext.ScrolledText(self, wrap=tk.WORD, 
                                     width=80, height=8, state=tk.DISABLED)
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
@@ -159,9 +161,11 @@ class TesteWidget(ttk.Frame):
         text = self.text_resultado
         text.configure(state=tk.NORMAL)
         text.delete(1.0, 'end')
-        erro = self.teste.testar()
+        codigo, saida, erro = self.teste.testar()
+        text.insert('end', f'Código: {codigo}')
+        text.insert('end', f'\nSaída: {saida}')
         if erro:
-            text.insert('end', erro)
+            text.insert('end', f'Erro: {erro}')
         text.configure(state=tk.DISABLED)
 
 # PROGRAMA PRINCIPAL
