@@ -88,7 +88,8 @@ class App(tk.Tk):
         # TODO: tornar tela scrollable
         self.geometry("1024x600")
         row = 0
-        botao_testar_todas = ttk.Button(self, text='Testar Todas')
+        botao_testar_todas = ttk.Button(self, text='Testar Todas',
+            command=self._testar_todas)
         botao_testar_todas.pack(anchor='e', padx=PADDING_G, pady=PADDING_G)
         row += 1
         frame_questoes = ttk.Frame(self)
@@ -103,6 +104,10 @@ class App(tk.Tk):
                 comando=comando, script=script, testes=testes)
             qw.pack(pady=PADDING_M)
             self.widgets_questoes += [qw]
+    
+    def _testar_todas(self):
+        for qw in self.widgets_questoes:
+            qw._testar_questao()
         
 
 class QuestaoWidget(ttk.Frame):
@@ -124,7 +129,8 @@ class QuestaoWidget(ttk.Frame):
         self.label = ttk.Label(self, text=self.questao.descricao)
         self.label.grid(column=0, row=row, columnspan=2, sticky='w',
             padx=(PADDING_M, 0), pady=(PADDING_M, 0))
-        self.botao_testar = ttk.Button(self, text='Testar Questão')
+        self.botao_testar = ttk.Button(self, text='Testar Questão',
+            command=self._testar_questao)
         self.botao_testar.grid(row=row, sticky='e', 
             padx=(0, PADDING_M), pady=PADDING_M)
 
@@ -133,6 +139,10 @@ class QuestaoWidget(ttk.Frame):
             tw = TesteWidget(self, p)
             tw.grid(padx=(0, PADDING_M), pady=(0, PADDING_P))
             self.widgets_testes += [tw]
+    
+    def _testar_questao(self):
+        for tw in self.widgets_testes:
+            tw._testar()
 
 
 class TesteWidget(ttk.Frame):
