@@ -131,7 +131,7 @@ class ScrolledText(tk.Text):
 
 
 class ScrolledFrame(ttk.Frame):
-    '''Frame com scrollabar.
+    '''Frame com scrollbar.
     *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` como `parent` do widget filho.'''
     def __init__(self, parent, height: int = 940, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
