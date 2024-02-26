@@ -24,8 +24,7 @@ class Questao:
         '''
         self.descricao = descricao
         self.script = script
-        self.correcoes = correcoes
-        # Converte as correcoes em objetos Correcao
+        # Converte as correções em objetos Correcao
         self.correcoes = []
         for args_script, func_expect, args_expect in correcoes:
             self.correcoes += [
