@@ -251,10 +251,16 @@ class QuestaoWidget(ttk.Frame):
         '''Executa todas as correcoes da questão.'''
         for tw in self.widgets_correcoes:
             tw._corrigir()
+    
+    def atualizar(self):
+        '''Atualiza este widget e o pai.
+        TODO: Implemnetar contagem de correções.'''
+        pass
 
 
 class CorrecaoWidget(ttk.Frame):
     '''Widget da Correcao.'''
+    resultado = 'Não executada'
 
     def __init__(self, parent, correcao: Correcao):
         '''Construtor.
@@ -262,6 +268,7 @@ class CorrecaoWidget(ttk.Frame):
         - `parent` é o widget pai que conterá este.
         - `correcao` é a correcao correspondente.'''
         super().__init__(parent)
+        self.widget_questao: QuestaoWidget = parent
         self.correcao: Correcao = correcao
         # Montagem
         # A correção é montada como grid. A variável `row` serve para controlar as linhas.
@@ -273,8 +280,10 @@ class CorrecaoWidget(ttk.Frame):
         self.botao_corrigir.grid(column=1, row=row, sticky='e',
             pady=(0, PADDING))
         row += 1
-        label_resultado = ttk.Label(self, text=f'Resultado:')
-        label_resultado.grid(column=0, row=row, sticky='w',
+        ttk.Label(self, text=f'Resultado:').grid(column=0, row=row, sticky='w',
+            padx=(PADDING*2, 0), pady=(0, PADDING))
+        self.label_resultado = ttk.Label(self, text=f'')
+        self.label_resultado.grid(column=1, row=row, sticky='e',
             padx=(PADDING*2, 0), pady=(0, PADDING))
         row += 1
         self.text_resultado = ScrolledText(self, wrap=tk.WORD, 
@@ -284,24 +293,26 @@ class CorrecaoWidget(ttk.Frame):
 
     def _corrigir(self):
         '''Executa a correcao e atualiza a interface com o resultado.'''
-        text = self.text_resultado
-        # Habilita a caixa de texto para edição
-        text.configure(state=tk.NORMAL)
-        # Limpa o texto
-        text.delete(1.0, 'end')
+        # Executa a correção
         codigo, saida, erro = self.correcao.corrigir()
-        if saida == '': saida = '\n'
-        # Preenche com o resultado da correcao
+        # Atualização da interface
+        text = self.text_resultado
+        text.configure(state=tk.NORMAL)  # Habilita a caixa de texto para edição
+        text.delete(1.0, 'end')  # Limpa o texto
+        # Preenche com o resultado da correção
         text.insert('end', f'Código: {codigo}')
-        text.insert('end', f'\nSaída: {saida}')
+        text.insert('end', f'\nSaída:\n{saida}')
         if erro:
-            text.insert('end', f'Erro: {erro}')
-        # Desabilita a edição
-        text.configure(state=tk.DISABLED)
-        # Atualiza a interface
-        root = self.winfo_toplevel()
-        root.update()
-        root.update_idletasks()
+            text.insert('end', f'Erro:\n{erro}')
+        text.configure(state=tk.DISABLED)  # Desabilita a edição
+        # Atualiza o label do resultado
+        self.resultado = 'Correta' if codigo == 0 else 'Incorreta'
+        self.label_resultado.configure(text=self.resultado)
+        # Atualiza o widget da questão
+        self.widget_questao.atualizar()
+        # Redesenha a interface
+        self.update()
+        self.update_idletasks()
 
 # PROGRAMA PRINCIPAL
 
