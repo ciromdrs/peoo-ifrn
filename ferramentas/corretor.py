@@ -286,24 +286,30 @@ class CorrecaoWidget(ttk.Frame):
             padx=(PADDING*2, 0), pady=(0, PADDING))
         row += 1
         self.text_resultado = ScrolledText(self, wrap=tk.WORD, 
-                                    width=80, height=8, state=tk.DISABLED)
+                                    width=80, height=1, state=tk.DISABLED)
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
             padx=(PADDING*2, 0), pady=(0, PADDING))
 
     def _corrigir(self):
         '''Executa a correcao e atualiza a interface com o resultado.'''
-        # Executa a correção
+        # Correção
         codigo, saida, erro = self.correcao.corrigir()
         # Atualização da interface
         text = self.text_resultado
-        text.configure(state=tk.NORMAL)  # Habilita a caixa de texto para edição
-        text.delete(1.0, 'end')  # Limpa o texto
-        # Preenche com o resultado da correção
-        text.insert('end', f'Código: {codigo}')
-        text.insert('end', f'\nSaída:\n{saida}')
+        # A variável res guarda o resultado da correção
+        res = f'Código: {codigo}'
+        if saida:
+            saida = saida[:-1]  # Remove a linha extra que sempre vem
+            res += f'\nSaída:\n{saida}'
         if erro:
-            text.insert('end', f'Erro:\n{erro}')
-        text.configure(state=tk.DISABLED)  # Desabilita a edição
+            res += f'\nErro:\n{erro}'
+        text.configure(state=tk.NORMAL)  # Habilita a caixa de texto para edição
+        text.delete(0.0, 'end')  # Limpa o texto
+        text.insert('end', res)  # Insere o resultado
+        altura = min(len(res.split('\n')), 20)  # Ajusta a altura
+        text.configure(
+            height=altura,
+            state=tk.DISABLED)  # Desabilita a edição
         # Atualiza o label do resultado
         self.resultado = 'Correta' if codigo == 0 else 'Incorreta'
         self.label_resultado.configure(text=self.resultado)
