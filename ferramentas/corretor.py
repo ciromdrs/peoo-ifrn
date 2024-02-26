@@ -212,6 +212,7 @@ class App(tk.Tk):
 
 class QuestaoWidget(ttk.Frame):
     '''Widget de Questões.'''
+    contador_corretas: int = 0
 
     def __init__(self, parent, questao: Questao):
         '''Construtor.
@@ -219,6 +220,7 @@ class QuestaoWidget(ttk.Frame):
         - `parent` é o widget pai que conterá este.
         - `questao` é a questão correspondente.'''
         super().__init__(parent)
+        self.frame_questoes: ScrolledFrame = parent
         self.questao: Questao = questao
         self.widgets_correcoes: list[CorrecaoWidget] = []
         # Personalização
@@ -252,9 +254,14 @@ class QuestaoWidget(ttk.Frame):
             tw._corrigir()
     
     def atualizar(self):
-        '''Atualiza este widget e o pai.
-        TODO: Implemnetar contagem de correções.'''
-        pass
+        '''Atualiza este widget.'''
+        # Conta quantas correções deram certo
+        self.contador_corretas = 0
+        for c in self.widgets_correcoes:
+            if c.resultado == 'Correta':
+                self.contador_corretas += 1
+        self.label.configure(text=self.questao.descricao + \
+            f' ({self.contador_corretas}/{len(self.widgets_correcoes)})')
 
 
 class CorrecaoWidget(ttk.Frame):
