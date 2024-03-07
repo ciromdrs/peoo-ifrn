@@ -334,7 +334,8 @@ class CorrecaoWidget(ttk.Frame):
             height=altura,
             state=tk.DISABLED)  # Desabilita a edição
         # Atualiza o label do resultado
-        self.resultado = 'Correta' if codigo == 0 else 'Incorreta'
+        # Mesmo o código sendo 0, a saída precisa ser a esperada, então é necessário que erro seja None
+        self.resultado = 'Incorreta' if erro else 'Correta'
         self.label_resultado.configure(text=self.resultado)
         # Atualiza o widget da questão
         self.widget_questao.atualizar()
