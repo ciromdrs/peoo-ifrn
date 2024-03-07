@@ -96,6 +96,16 @@ def testar_igual(resultado: str, esperado: str) -> tuple[bool, str]:
         return False, erro
     return True, ''
 
+def testar_regex(resultado: str, regex: str) -> tuple[bool, str]:
+    '''Verifica se `regex` casa em `resultado`.'''
+    import re
+    resultado = resultado.strip("\n\r\t ")
+    padrao = re.compile(regex)
+    if padrao.search(resultado) is None:
+        erro = f'Esperava encontrar o padrão "{regex}".'
+        return False, erro
+    return True, ''
+
 
 # INTERFACE GRÁFICA
 
