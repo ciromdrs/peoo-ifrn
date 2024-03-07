@@ -199,7 +199,7 @@ class App(tk.Tk):
         frame_principal.pack(expand=True, fill=tk.BOTH)
         frame_topo = ttk.Frame(frame_principal, borderwidth=2, relief=tk.GROOVE)
         frame_topo.pack(fill=tk.BOTH, pady=(0,PADDING))
-        botao_corrigir_todas = ttk.Button(frame_topo, text='Corrigir Todas',
+        botao_corrigir_todas = ttk.Button(frame_topo, text='▶️ Corrigir Todas',
             command=self._corrigir_todas)
         botao_corrigir_todas.pack(padx=PADDING*4, pady=PADDING*4)
         self.frame_questoes = ScrolledFrame(frame_principal)
@@ -252,7 +252,7 @@ class QuestaoWidget(ttk.Frame):
         self.label = ttk.Label(self, text=self.questao.descricao)
         self.label.grid(column=0, row=row, columnspan=2, sticky='w',
             padx=(PADDING*2, 0), pady=(PADDING*2, 0))
-        self.botao_corrigir = ttk.Button(self, text='Corrigir Questão',
+        self.botao_corrigir = ttk.Button(self, text='▶️ Corrigir Questão',
             command=self._corrigir_questao)
         self.botao_corrigir.grid(row=row, sticky='e', 
             padx=(0, PADDING*2), pady=PADDING*2)
@@ -298,7 +298,7 @@ class CorrecaoWidget(ttk.Frame):
         self.label_comando = ttk.Label(self, text=f'Comando: {correcao.comando_completo}')
         self.label_comando.grid(column=0, row=row, sticky='w',
             padx=(PADDING*2, 0), pady=(0, PADDING))
-        self.botao_corrigir = ttk.Button(self, text='Corrigir', command=self._corrigir)
+        self.botao_corrigir = ttk.Button(self, text='▶️', width=2, command=self._corrigir)
         self.botao_corrigir.grid(column=1, row=row, sticky='e',
             pady=(0, PADDING))
         row += 1
