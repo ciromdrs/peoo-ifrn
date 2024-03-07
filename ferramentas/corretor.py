@@ -131,36 +131,52 @@ class ScrolledText(tk.Text):
 
 class ScrolledFrame(ttk.Frame):
     '''Frame com scrollbar.
-    *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` como `parent` do widget filho.'''
-    def __init__(self, parent, height: int = 940, *args, **kwargs):
+    *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` deste como `parent` do widget filho.'''
+    def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-
-        # Na raiz, é necessário um Canvas e a Scrollbar
-        canvas = tk.Canvas(self, height=height, width=LARGURA_WIDGET_QUESTAO)
+        # Na raiz, é necessário um Canvas
+        canvas = tk.Canvas(self, width=LARGURA_WIDGET_QUESTAO)
         scrollbar = ttk.Scrollbar(self, command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
         canvas.pack(anchor='center',side="left", expand=True)
         scrollbar.pack(side="right", fill="y")
+
         # Dentro do canvas, é necessário um Frame
         conteudo = ttk.Frame(canvas)
         posx = parent.winfo_width() / 2
         canvas.create_window((posx, 0), window=conteudo, anchor="nw")
         # Configura o Canvas para atualizar a scrollbar quando o tamanho muda
-        conteudo.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        conteudo.bind("<Configure>", self._on_resize)
         # Habilita o mouse wheel
         canvas.bind_all("<Button-4>", self._on_mousewheel_up)
         canvas.bind_all("<Button-5>", self._on_mousewheel_down)
-
+        # Guarda as referências no self
         self.canvas = canvas
         self.conteudo = conteudo
+        self.parent = parent
 
     def _on_mousewheel_up(self, event):
-        '''Sobe a view do `self.canvas`.'''
+        '''Sobe a view do `canvas`.'''
         self.canvas.yview_scroll(-1, "units")
 
     def _on_mousewheel_down(self, event):
-        '''Desce a view do `self.canvas`.'''
+        '''Desce a view do `canvas`.'''
         self.canvas.yview_scroll(1, "units")
+    
+    def _on_resize(self, event):
+        '''Redimensiona o `canvas`.'''
+        # Atualiza os widgets para pegar o tamanho atual
+        self.conteudo.update()
+        # bbox é uma tupla (x, y, largura, altura) que engloba todo o conteúdo do canvas
+        bbox = self.canvas.bbox('all')
+        # Existe algum problema que ela pega além do tamanho do que é visível,
+        # então consertamos isso copiando os demais valores e recalculando a altura
+        altura = self.conteudo.winfo_height()
+        nova_bbox = *bbox[:3], altura
+        self.canvas.configure(
+            scrollregion = nova_bbox,
+            height = altura,
+        )
 
 
 class App(tk.Tk):
