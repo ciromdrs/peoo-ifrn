@@ -191,7 +191,7 @@ class ScrolledFrame(ttk.Frame):
         )
 
 
-class App(tk.Tk):
+class Corretor(tk.Tk):
     '''Janela principal do corretor.'''
 
     def __init__(self, caminho_config: str):
@@ -378,7 +378,7 @@ class CorrecaoWidget(ttk.Frame):
 # PROGRAMA PRINCIPAL
 
 if __name__ == '__main__':
-    app = App('config.json')
+    app = Corretor('config.json')
     style = ttk.Style(app)
     temas = style.theme_names()
     style.theme_use(temas[0])
