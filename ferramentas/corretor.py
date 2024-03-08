@@ -383,7 +383,7 @@ class CorrecaoWidget(ttk.Frame):
         ttk.Label(self, text=f'Entrada', font='Arial 14').grid(column=0, row=row, sticky='w',
             pady=(0, PADDING))
         row += 1
-        text_entrada = tk.Text(self, wrap=tk.WORD, width=80, height=1)
+        text_entrada = ScrolledText(self, wrap=tk.WORD, width=80, height=1)
         text_entrada.grid(column=0, row=row, sticky='w', columnspan=2,
             pady=(0, PADDING))
         text_entrada.delete(0.0, 'end')  # Limpa o texto
@@ -400,7 +400,7 @@ class CorrecaoWidget(ttk.Frame):
         ttk.Label(self, text=f'Resultado', font='Arial 14').grid(column=0, row=row, sticky='w',
             pady=(0, PADDING))
         row += 1
-        self.text_resultado = tk.Text(self, wrap=tk.WORD, 
+        self.text_resultado = ScrolledText(self, wrap=tk.WORD, 
                                     width=80, height=1, state=tk.DISABLED)
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
             pady=(0, PADDING))
