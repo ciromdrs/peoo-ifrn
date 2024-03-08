@@ -208,18 +208,25 @@ class Corretor(tk.Tk):
         # O frame principal contém todos os elementos da tela
         # Isso facilita o redimensionamento da janela sem alterar seu conteúdo
         frame_principal = ttk.Frame(self)
+        self.frame_principal = frame_principal
         frame_principal.pack(expand=True, fill=tk.BOTH)
-        frame_topo = ttk.Frame(frame_principal, borderwidth=2, relief=tk.GROOVE)
-        frame_topo.pack(fill=tk.BOTH, pady=(0,PADDING))
-        botao_corrigir_todas = ttk.Button(frame_topo, text='▶️ Corrigir Todas',
-            command=self._corrigir_todas)
-        botao_corrigir_todas.pack(padx=PADDING*4, pady=PADDING*4)
+        self._montar_frame_topo()
         self.frame_questoes = ScrolledFrame(frame_principal, width=LARGURA_WIDGET_QUESTAO)
         self.frame_questoes.pack(fill=tk.BOTH)
         self._montar_questoes()
     
+    def _montar_frame_topo(self):
+        '''Monta o frame do topo da tela.'''
+        frame_topo = ttk.Frame(self.frame_principal, borderwidth=2, relief=tk.GROOVE)
+        frame_topo.pack(fill=tk.BOTH, pady=(0,PADDING))
+        botao_corrigir_todas = ttk.Button(frame_topo, text='▶️ Corrigir Todas',
+            command=self._corrigir_todas)
+        botao_corrigir_todas.pack(padx=PADDING*4, pady=(PADDING*4, 0))
+        self.label_corretas = ttk.Label(frame_topo)
+        self.label_corretas.pack(pady = (0, PADDING*4))
+
     def _montar_questoes(self):
-        '''Monta os widgets das questões'''
+        '''Monta os widgets das questões.'''
         self.widgets_questoes: list[QuestaoWidget] = []
         for dados in self.config['questoes']:
             desc = dados['descricao']
@@ -228,7 +235,7 @@ class Corretor(tk.Tk):
             correcoes = dados['correcoes']
             questao = Questao(descricao=desc, comando=comando, script=script,
                 correcoes=correcoes)
-            qw = QuestaoWidget(self.frame_questoes.conteudo, questao)
+            qw = QuestaoWidget(self.frame_questoes.conteudo, self, questao)
             qw.pack(pady=(0,PADDING))
             self.widgets_questoes += [qw]
 
@@ -236,18 +243,29 @@ class Corretor(tk.Tk):
         '''Testa todas as questões.'''
         for qw in self.widgets_questoes:
             qw._corrigir_questao()
-        
+
+    def atualizar(self):
+        '''Atualiza este widget.'''
+        # Conta quantas questões deram certo
+        contador_corretas = 0
+        for q in self.widgets_questoes:
+            if q.correta:
+                contador_corretas += 1
+        total = len(self.widgets_questoes)
+        self.label_corretas.configure(text=f'Corretas: {contador_corretas} de {total}')
+
 
 class QuestaoWidget(ttk.Frame):
     '''Widget de Questões.'''
     contador_corretas: int = 0
 
-    def __init__(self, parent, questao: Questao):
+    def __init__(self, parent, janela_corretor: Corretor, questao: Questao):
         '''Construtor.
         Parâmetros:
         - `parent` é o widget pai que conterá este.
         - `questao` é a questão correspondente.'''
         super().__init__(parent)
+        self.janela_corretor = janela_corretor
         self.frame_questoes: ScrolledFrame = parent
         self.questao: Questao = questao
         self.widgets_correcoes: list[CorrecaoWidget] = []
@@ -258,14 +276,21 @@ class QuestaoWidget(ttk.Frame):
         self._montar_correcoes()
     
     def _montar_primeira_linha(self):
-        '''Monta a primeira linha deste widget, que contém a descrição da questão e o botão para corrigir.'''
-        self.label = ttk.Label(self, text=self.questao.descricao)
-        self.label.grid(row=0, columnspan=2, sticky='w',
+        '''Monta a primeira linha deste widget, que contém a descrição da questão, o botão para corrigir e o label do resultado.'''
+        frame1 = ttk.Frame(self)
+        frame1.grid(columnspan=2, sticky='news')
+        self.label_decricao = ttk.Label(frame1, text=self.questao.descricao)
+        self.label_decricao.pack(side=tk.LEFT, fill='x', expand=True, anchor='n',
             padx=(PADDING*2, 0), pady=(PADDING*2, 0))
-        self.botao_corrigir = ttk.Button(self, text='▶️ Corrigir Questão',
+        frame2 = ttk.Frame(frame1)
+        frame2.pack(side=tk.RIGHT)
+        self.botao_corrigir = ttk.Button(frame2, text='▶️ Corrigir Questão',
             command=self._corrigir_questao)
-        self.botao_corrigir.grid(row=0, sticky='e', 
-            padx=(0, PADDING*2), pady=PADDING*2)
+        self.botao_corrigir.pack(side=tk.TOP,
+            padx=(0, PADDING*2), pady=(PADDING*2, 0))
+        self.label_resultado = ttk.Label(frame2, text=f'')
+        self.label_resultado.pack(side=tk.BOTTOM, anchor='e',
+            padx=(0, PADDING*2), pady=(0, PADDING))
 
     def _montar_correcoes(self):
         '''Monta o widget de cada correção.'''
@@ -286,8 +311,13 @@ class QuestaoWidget(ttk.Frame):
         for c in self.widgets_correcoes:
             if c.resultado == 'Correta':
                 self.contador_corretas += 1
-        self.label.configure(text=self.questao.descricao + \
-            f' ({self.contador_corretas}/{len(self.widgets_correcoes)})')
+        texto_corretas = f'Corretas: {self.contador_corretas} de {len(self.widgets_correcoes)}'
+        self.label_resultado.configure(text=f'{texto_corretas}')
+        self.janela_corretor.atualizar()
+    
+    @property
+    def correta(self):
+        return self.contador_corretas == len(self.widgets_correcoes)
 
 
 class CorrecaoWidget(ttk.Frame):
@@ -341,12 +371,15 @@ class CorrecaoWidget(ttk.Frame):
         self.label_comando = ttk.Label(self, text=f'Comando: {self.correcao.comando_completo}')
         self.label_comando.grid(column=0, sticky='w',
             padx=(PADDING*2, 0), pady=(0, PADDING))
-        self.botao_corrigir = ttk.Button(self, text='▶️', width=2,
+        self.botao_corrigir = ttk.Button(self, text='▶️ Testar', width=8,
             command=self._corrigir)
-        self.botao_corrigir.grid(column=1, row=0, sticky='e', pady=(0, PADDING))
+        self.botao_corrigir.grid(column=1, row=0, sticky='e')
+        self.label_resultado = ttk.Label(self, text=f'')
+        self.label_resultado.grid(column=1, row=1, sticky='e',
+            padx=(PADDING*2, 0), pady=(0, PADDING))
 
     def _montar_entrada(self):
-        row = 2
+        row = 1
         ttk.Label(self, text=f'Entrada:').grid(column=0, row=row, sticky='w',
             padx=(PADDING*2, 0), pady=(0, PADDING))
         row += 1
@@ -365,9 +398,6 @@ class CorrecaoWidget(ttk.Frame):
     def _montar_resultado(self):
         row = 4
         ttk.Label(self, text=f'Resultado:').grid(column=0, row=row, sticky='w',
-            padx=(PADDING*2, 0), pady=(0, PADDING))
-        self.label_resultado = ttk.Label(self, text=f'')
-        self.label_resultado.grid(column=1, row=row, sticky='e',
             padx=(PADDING*2, 0), pady=(0, PADDING))
         row += 1
         self.text_resultado = tk.Text(self, wrap=tk.WORD, 
