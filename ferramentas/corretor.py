@@ -284,7 +284,7 @@ class QuestaoWidget(ttk.Frame):
         # Conta quantas correções deram certo
         self.contador_corretas = 0
         for c in self.widgets_correcoes:
-            if c.resultado == 'Correto':
+            if c.resultado == 'Correta':
                 self.contador_corretas += 1
         self.label.configure(text=self.questao.descricao + \
             f' ({self.contador_corretas}/{len(self.widgets_correcoes)})')
@@ -329,7 +329,7 @@ class CorrecaoWidget(ttk.Frame):
                        state=tk.DISABLED)  # Desabilita a edição
         # Atualiza o label do resultado
         # Mesmo o código sendo 0, a saída precisa ser a esperada, então é necessário que erro seja None
-        self.resultado = 'Incorreto' if erro else 'Correto'
+        self.resultado = 'Incorreta' if erro else 'Correta'
         self.label_resultado.configure(text=self.resultado)
         # Atualiza o widget da questão
         self.widget_questao.atualizar()
