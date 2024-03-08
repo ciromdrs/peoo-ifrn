@@ -319,12 +319,12 @@ class CorrecaoWidget(ttk.Frame):
         # Atualização da interface
         text = self.text_resultado
         # A variável res guarda o resultado da correção
-        res = f'Código: {codigo}'
+        res = ''
         if saida:
             saida = saida[:-1]  # Remove a linha extra que sempre vem
-            res += f'\nSaída:\n{saida}'
+            res += f'Saída:\n{saida}\n'
         if erro:
-            res += f'\nErro:\n{erro}'
+            res += f'Erro:\n{erro}'
         text.configure(state=tk.NORMAL)  # Habilita a caixa de texto para edição
         text.delete(0.0, 'end')  # Limpa o texto
         text.insert('end', res)  # Insere o resultado
