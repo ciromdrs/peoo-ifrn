@@ -112,7 +112,7 @@ def testar_regex(resultado: str, regex: str) -> tuple[bool, str]:
 # Constantes
 # Paddings tamanho P, M e G
 PADDING = 5
-LARGURA_WIDGET_QUESTAO = 695
+LARGURA_WIDGET_QUESTAO = 694
 
 class ScrolledText(tk.Text):
     """ScrolledText do tk.scrolledtext reimplementado com ttk.
