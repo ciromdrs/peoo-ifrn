@@ -207,6 +207,9 @@ class Corretor():
         style = ttk.Style()
         temas = style.theme_names()
         style.theme_use(temas[0])
+        style.configure('TFrame')
+        style.configure('H2.TLabel', font='Arial 14')
+        style.configure('H1.TLabel', font='Arial 16')
 
         # Lê o arquivo de configuração
         self.config = json.load(open(caminho_config))
@@ -289,7 +292,7 @@ class QuestaoWidget(ttk.Frame):
         '''Monta a primeira linha deste widget, que contém a descrição da questão, o botão para corrigir e o label do resultado.'''
         frame1 = ttk.Frame(self)
         frame1.grid(columnspan=2, sticky='news')
-        self.label_decricao = ttk.Label(frame1, text=self.questao.descricao, font='Arial 16')
+        self.label_decricao = ttk.Label(frame1, text=self.questao.descricao, style='H1.TLabel')
         self.label_decricao.pack(side=tk.LEFT, fill='x', expand=True, anchor='n',
             padx=(PADDING*3, 0), pady=(PADDING*3, 0))
         
@@ -377,7 +380,7 @@ class CorrecaoWidget(ttk.Frame):
         self.update_idletasks()
     
     def _montar_primeira_linha(self):
-        label = ttk.Label(self, text=f'Comando', font='Arial 14')
+        label = ttk.Label(self, text=f'Comando', style='H2.TLabel')
         label.grid(column=0, sticky='w', pady=(0, PADDING))
         label = ttk.Label(self, text=f'{self.correcao.comando_completo}')
         label.grid(row=1, column=0, sticky='w', pady=(0, PADDING))
@@ -389,7 +392,7 @@ class CorrecaoWidget(ttk.Frame):
 
     def _montar_entrada(self):
         row = 2
-        ttk.Label(self, text=f'Entrada', font='Arial 14').grid(column=0, row=row, sticky='w',
+        ttk.Label(self, text=f'Entrada', style='H2.TLabel').grid(column=0, row=row, sticky='w',
             pady=(0, PADDING))
         row += 1
         text_entrada = ScrolledText(self, wrap=tk.WORD, width=80, height=1)
@@ -406,7 +409,7 @@ class CorrecaoWidget(ttk.Frame):
     
     def _montar_resultado(self):
         row = 4
-        ttk.Label(self, text=f'Resultado', font='Arial 14').grid(column=0, row=row, sticky='w',
+        ttk.Label(self, text=f'Resultado', style='H2.TLabel').grid(column=0, row=row, sticky='w',
             pady=(0, PADDING))
         row += 1
         self.text_resultado = ScrolledText(self, wrap=tk.WORD, 
