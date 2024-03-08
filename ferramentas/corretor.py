@@ -8,6 +8,7 @@ from tkinter import ttk
 # Constantes
 TIMEOUT = 2
 
+
 # Classes
 
 class Questao:
@@ -110,7 +111,6 @@ def testar_regex(resultado: str, regex: str) -> tuple[bool, str]:
 # INTERFACE GRÁFICA
 
 # Constantes
-# Paddings tamanho P, M e G
 PADDING = 5
 LARGURA_WIDGET_QUESTAO = 694
 
@@ -157,11 +157,13 @@ class ScrolledFrame(ttk.Frame):
         conteudo = ttk.Frame(canvas)
         posx = parent.winfo_width() / 2
         canvas.create_window((posx, 0), width=width, window=conteudo, anchor="nw")
+
         # Configura o Canvas para atualizar a scrollbar quando o tamanho muda
         conteudo.bind("<Configure>", self._on_resize)
         # Habilita o mouse wheel
         canvas.bind_all("<Button-4>", self._on_mousewheel_up)
         canvas.bind_all("<Button-5>", self._on_mousewheel_down)
+
         # Guarda as referências no self
         self.canvas = canvas
         self.conteudo = conteudo
@@ -198,7 +200,6 @@ class Corretor():
         '''Construtor.
         `caminho_config` é o caminho para o arquivo json de configuração da correção.'''
         super().__init__()
-
         janela = tk.Tk()
         self.janela = janela
 
@@ -206,9 +207,9 @@ class Corretor():
         style = ttk.Style()
         temas = style.theme_names()
         style.theme_use(temas[0])
+
         # Lê o arquivo de configuração
         self.config = json.load(open(caminho_config))
-
         # Configura a janela
         janela.title(f"Corretor Automático - {self.config['titulo']}")
         janela.geometry("1024x600")
@@ -255,7 +256,6 @@ class Corretor():
 
     def atualizar(self):
         '''Atualiza este widget.'''
-        # Conta quantas questões deram certo
         contador_corretas = 0
         for q in self.widgets_questoes:
             if q.correta:
@@ -272,7 +272,8 @@ class QuestaoWidget(ttk.Frame):
         '''Construtor.
         Parâmetros:
         - `parent` é o widget pai que conterá este.
-        - `questao` é a questão correspondente.'''
+        - `questao` é a questão correspondente.
+        - `janela_corretor` é uma referência à aplicação do corretor.'''
         super().__init__(parent)
         self.janela_corretor = janela_corretor
         self.frame_questoes: ScrolledFrame = parent
@@ -291,6 +292,7 @@ class QuestaoWidget(ttk.Frame):
         self.label_decricao = ttk.Label(frame1, text=self.questao.descricao, font='Arial 16')
         self.label_decricao.pack(side=tk.LEFT, fill='x', expand=True, anchor='n',
             padx=(PADDING*3, 0), pady=(PADDING*3, 0))
+        
         frame2 = ttk.Frame(frame1)
         frame2.pack(side=tk.RIGHT)
         self.botao_corrigir = ttk.Button(frame2, text='▶️ Corrigir Questão',
@@ -315,7 +317,6 @@ class QuestaoWidget(ttk.Frame):
     
     def atualizar(self):
         '''Atualiza este widget.'''
-        # Conta quantas correções deram certo
         self.contador_corretas = 0
         for c in self.widgets_correcoes:
             if c.resultado == 'Correta':
@@ -325,7 +326,8 @@ class QuestaoWidget(ttk.Frame):
         self.janela_corretor.atualizar()
     
     @property
-    def correta(self):
+    def correta(self) -> bool:
+        '''Retorna True se todas as correções estão corretas e False, caso contrário.'''
         return self.contador_corretas == len(self.widgets_correcoes)
 
 
@@ -341,23 +343,21 @@ class CorrecaoWidget(ttk.Frame):
         super().__init__(parent)
         self.widget_questao: QuestaoWidget = parent
         self.correcao: Correcao = correcao
+        
         # Montagem
-        # A correção é montada como grid. A variável `row` serve para controlar as linhas.
         self._montar_primeira_linha()
         self._montar_entrada()
         self._montar_resultado()
 
     def _corrigir(self):
         '''Executa a correcao e atualiza a interface com o resultado.'''
-        # Correção
-        codigo, saida, erro = self.correcao.corrigir()
-        # Atualização da interface
+        _, saida, erro = self.correcao.corrigir()
+        # Atualiza a interface
         text = self.text_resultado
-        # A variável res guarda o resultado da correção
-        res = ''
+        res = ''  # Guarda o resultado da correção
         if saida:
-            saida = saida[:-1]  # Remove a linha extra que sempre vem
-            res += f'Saída:\n{saida}\n'
+            saida = saida  # Remove a linha extra que sempre vem
+            res += f'Saída:\n{saida}'
         if erro:
             res += f'Erro:\n{erro}'
         text.configure(state=tk.NORMAL)  # Habilita a caixa de texto para edição
@@ -414,10 +414,9 @@ class CorrecaoWidget(ttk.Frame):
         self.text_resultado.grid(column=0, row=row, sticky='w', columnspan=2,
             pady=(0, PADDING))
 
+
 # PROGRAMA PRINCIPAL
 
 if __name__ == '__main__':
     app = Corretor('config.json')
     app.janela.mainloop()
-
-
