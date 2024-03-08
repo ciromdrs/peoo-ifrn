@@ -191,23 +191,32 @@ class ScrolledFrame(ttk.Frame):
         )
 
 
-class Corretor(tk.Tk):
+class Corretor():
     '''Janela principal do corretor.'''
 
     def __init__(self, caminho_config: str):
         '''Construtor.
         `caminho_config` é o caminho para o arquivo json de configuração da correção.'''
         super().__init__()
+
+        janela = tk.Tk()
+        self.janela = janela
+
+        # Tema e estilos
+        style = ttk.Style()
+        temas = style.theme_names()
+        style.theme_use(temas[0])
         # Lê o arquivo de configuração
         self.config = json.load(open(caminho_config))
-        # Atribui o título da janela
-        self.title(f"Corretor Automático - {self.config['titulo']}")
-        # Configura o tamanho da janela
-        self.geometry("1024x600")
+
+        # Configura a janela
+        janela.title(f"Corretor Automático - {self.config['titulo']}")
+        janela.geometry("1024x600")
+
         # Montagem da interface
         # O frame principal contém todos os elementos da tela
         # Isso facilita o redimensionamento da janela sem alterar seu conteúdo
-        frame_principal = ttk.Frame(self)
+        frame_principal = ttk.Frame(janela)
         self.frame_principal = frame_principal
         frame_principal.pack(expand=True, fill=tk.BOTH)
         self._montar_frame_topo()
@@ -409,9 +418,6 @@ class CorrecaoWidget(ttk.Frame):
 
 if __name__ == '__main__':
     app = Corretor('config.json')
-    style = ttk.Style(app)
-    temas = style.theme_names()
-    style.theme_use(temas[0])
-    app.mainloop()
+    app.janela.mainloop()
 
 
