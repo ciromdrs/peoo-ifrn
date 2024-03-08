@@ -144,19 +144,19 @@ class ScrolledText(tk.Text):
 class ScrolledFrame(ttk.Frame):
     '''Frame com scrollbar.
     *ATENÇÃO:* para colocar widgets dentro deste, passe o `.conteudo` deste como `parent` do widget filho.'''
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, width, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         # Na raiz, é necessário um Canvas
-        canvas = tk.Canvas(self, width=LARGURA_WIDGET_QUESTAO)
+        canvas = tk.Canvas(self, width=width)
         scrollbar = ttk.Scrollbar(self, command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(anchor='center',side="left", expand=True)
+        canvas.pack(anchor='center', side="left", expand=True)
         scrollbar.pack(side="right", fill="y")
 
         # Dentro do canvas, é necessário um Frame
         conteudo = ttk.Frame(canvas)
         posx = parent.winfo_width() / 2
-        canvas.create_window((posx, 0), window=conteudo, anchor="nw")
+        canvas.create_window((posx, 0), width=width, window=conteudo, anchor="nw")
         # Configura o Canvas para atualizar a scrollbar quando o tamanho muda
         conteudo.bind("<Configure>", self._on_resize)
         # Habilita o mouse wheel
@@ -214,7 +214,7 @@ class App(tk.Tk):
         botao_corrigir_todas = ttk.Button(frame_topo, text='▶️ Corrigir Todas',
             command=self._corrigir_todas)
         botao_corrigir_todas.pack(padx=PADDING*4, pady=PADDING*4)
-        self.frame_questoes = ScrolledFrame(frame_principal)
+        self.frame_questoes = ScrolledFrame(frame_principal, width=LARGURA_WIDGET_QUESTAO)
         self.frame_questoes.pack(fill=tk.BOTH)
         self._montar_questoes()
     
@@ -254,26 +254,24 @@ class QuestaoWidget(ttk.Frame):
         # Personalização
         self.configure(borderwidth=2, relief=tk.GROOVE)
         # Montagem
-        row = 0
-        self._montar_primeira_linha(row)
-        row += 1
+        self._montar_primeira_linha()
         self._montar_correcoes()
     
-    def _montar_primeira_linha(self, row):
+    def _montar_primeira_linha(self):
         '''Monta a primeira linha deste widget, que contém a descrição da questão e o botão para corrigir.'''
         self.label = ttk.Label(self, text=self.questao.descricao)
-        self.label.grid(column=0, row=row, columnspan=2, sticky='w',
+        self.label.grid(row=0, columnspan=2, sticky='w',
             padx=(PADDING*2, 0), pady=(PADDING*2, 0))
         self.botao_corrigir = ttk.Button(self, text='▶️ Corrigir Questão',
             command=self._corrigir_questao)
-        self.botao_corrigir.grid(row=row, sticky='e', 
+        self.botao_corrigir.grid(row=0, sticky='e', 
             padx=(0, PADDING*2), pady=PADDING*2)
 
     def _montar_correcoes(self):
         '''Monta o widget de cada correção.'''
-        for p in self.questao.correcoes:
+        for i, p in enumerate(self.questao.correcoes):
             tw = CorrecaoWidget(self, p)
-            tw.grid(padx=PADDING*2, pady=(0, PADDING))
+            tw.grid(padx=PADDING*2, pady=(0, PADDING), row=i+1)
             self.widgets_correcoes += [tw]
     
     def _corrigir_questao(self):
@@ -327,9 +325,8 @@ class CorrecaoWidget(ttk.Frame):
         text.delete(0.0, 'end')  # Limpa o texto
         text.insert('end', res)  # Insere o resultado
         altura = min(len(res.split('\n')), 20)  # Ajusta a altura
-        text.configure(
-            height=altura,
-            state=tk.DISABLED)  # Desabilita a edição
+        text.configure(height=altura,
+                       state=tk.DISABLED)  # Desabilita a edição
         # Atualiza o label do resultado
         # Mesmo o código sendo 0, a saída precisa ser a esperada, então é necessário que erro seja None
         self.resultado = 'Incorreta' if erro else 'Correta'
