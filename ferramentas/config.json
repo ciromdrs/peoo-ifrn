@@ -6,8 +6,22 @@
             "comando" : "python",
             "script" : "q1.py",
             "correcoes" : [
-                ["hello", "testar_igual", "hello"],
-                ["", "testar_igual", "args"]
+                {
+                    "input" : "hello\n",
+                    "args" : "hello",
+                    "teste" : {
+                        "func_expect" : "testar_igual",
+                        "args_expect" : "hello"
+                    }
+                },
+                {
+                    "input" : "olá\n",
+                    "args" : "olá",
+                    "teste" : {
+                        "func_expect" : "testar_igual",
+                        "args_expect" : "isto deveria falhar"
+                    }
+                }
             ]
         },
         {
@@ -15,15 +29,23 @@
             "comando" : "python",
             "script" : "q2.py",
             "correcoes" : [
-                ["", "testar_igual", "args"]
+                {
+                    "teste" : {
+                        "func_expect" : "testar_igual",
+                        "args_expect" : "isto deveria dar erro de sintaxe"
+                    }
+                }
             ]
         },
         {
             "descricao" : "Questão 3",
             "comando" : "python",
-            "script" : "q3.py",
+            "script" : "arquivo_ausente.py",
             "correcoes" : [
-                ["", "testar_igual", "args"]
+                { 
+                    "input" : "", "args" : "",
+                    "teste" : { "func_expect" : "testar_igual" }
+                }
             ]
         }
    ]

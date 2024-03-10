@@ -14,7 +14,7 @@ TIMEOUT = 2
 class Questao:
     '''Uma questão para corrigir.'''
 
-    def __init__(self, descricao: str, comando: str, script: str, correcoes: list):
+    def __init__(self, descricao: str, comando: str, script: str, correcoes: list['Correcao']):
         '''Construtor.
 
         Parâmetros:
@@ -25,31 +25,58 @@ class Questao:
         '''
         self.descricao = descricao
         self.script = script
-        # Converte as correções em objetos Correcao
-        self.correcoes = []
-        for args_script, func_expect, args_expect in correcoes:
-            self.correcoes += [
-                Correcao(comando, script, args_script, func_expect, args_expect)]
+        self.correcoes = correcoes
+    
+    @classmethod
+    def ler_config(cls, config_questao: dict) -> 'Questao':
+        '''Cria uma instância a partir do dict obtido da leitura do arquivo config.json.
+        
+        Parâmetros:
+        - `config_questao` é o dict de uma questao (um elemento da lista "questoes").'''
+        desc = config_questao['descricao']
+        comando = config_questao['comando']
+        script = config_questao['script']
+        correcoes: list[Correcao] = []
+        for config_correcao in config_questao['correcoes']:
+            c = Correcao.ler_config(comando, script, config_correcao)
+            correcoes += [c]
+        q = cls(desc, comando, script, correcoes)
+        return q
 
 
 class Correcao:
     '''Uma correcao de uma questão.'''
 
-    def __init__(self, comando: str, script: str, input_: str, func_expect, args_expect: list):
+    def __init__(self, comando: str, script: str, input_: str, cli_args: str, func_expect, args_expect: list):
         '''Construtor.
         
         Parâmetros:
         - `comando` é o comando do terminal para executar o script da resposta.
         - `script` é o script da resposta.
-        - `input_` é a entrada do teclado. O atributo `args` é calculado a partir dela, substituindo \n por espaços.
+        - `input_` é a entrada do teclado.
+        - `cli_args` são os argumentos da linha de comando salvos no atributo `args`.
         - `func_expect` é a função que verifica a saída do script.
         - `args_expect` são os argumentos da função que verifica a saída do script.'''
-        self.comando = comando
-        self.script = script
-        self.input = input_.encode()
-        self.args = input_.replace('\n', ' ')
-        self.func_expect = func_expect
-        self.args_expect = args_expect
+        self.comando: str = comando
+        self.script: str = script
+        self.input: str = input_.encode()
+        self.args: str = cli_args
+        self.func_expect: str = func_expect
+        self.args_expect: str = args_expect
+
+    @classmethod
+    def ler_config(cls, comando: str, script: str, config_correcao: dict) -> 'Correcao':
+        '''Cria uma instância a partir do dict obtido da leitura do arquivo config.json.
+        
+        Parâmetros:
+        - `comando` e `script` são os mesmos da `Questao`.
+        - `config_correcao` é o dict de uma correção (um elemento da lista "correcoes").'''
+        input_ = config_correcao.get('input', '')
+        args = config_correcao.get('args', '')
+        func_expect = config_correcao['teste']['func_expect']
+        args_expect = config_correcao['teste'].get('args_expect', '')
+        correcao = cls(comando, script, input_, args, func_expect, args_expect)
+        return correcao
 
     @property
     def comando_completo(self) -> str:
@@ -241,13 +268,8 @@ class Corretor():
     def _montar_questoes(self):
         '''Monta os widgets das questões.'''
         self.widgets_questoes: list[QuestaoWidget] = []
-        for dados in self.config['questoes']:
-            desc = dados['descricao']
-            comando = dados['comando']
-            script = dados['script']
-            correcoes = dados['correcoes']
-            questao = Questao(descricao=desc, comando=comando, script=script,
-                correcoes=correcoes)
+        for questao_config in self.config['questoes']:
+            questao = Questao.ler_config(questao_config)
             qw = QuestaoWidget(self.frame_questoes.conteudo, self, questao)
             qw.pack(pady=PADDING*2)
             self.widgets_questoes += [qw]
