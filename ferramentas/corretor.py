@@ -237,6 +237,9 @@ class Corretor():
         style.configure('TFrame')
         style.configure('H2.TLabel', font='Arial 14')
         style.configure('H1.TLabel', font='Arial 16')
+        style.configure('Verde.TButton', background='#9e9')
+        style.configure('Vermelho.TButton', background='#e99')
+        style.configure('Amarelo.TButton', background='#ee9')
 
         # Lê o arquivo de configuração
         self.config = json.load(open(caminho_config))
@@ -259,9 +262,9 @@ class Corretor():
         '''Monta o frame do topo da tela.'''
         frame_topo = ttk.Frame(self.frame_principal, borderwidth=2, relief=tk.GROOVE)
         frame_topo.pack(fill=tk.BOTH)
-        botao_corrigir_todas = ttk.Button(frame_topo, text='▶️ Corrigir Todas',
+        self.botao_corrigir_todas = ttk.Button(frame_topo, text='▶️ Corrigir Todas',
             command=self._corrigir_todas, padding=PADDING*3)
-        botao_corrigir_todas.pack(padx=PADDING*4, pady=(PADDING*4, 0))
+        self.botao_corrigir_todas.pack(padx=PADDING*4, pady=(PADDING*4, 0))
         self.label_corretas = ttk.Label(frame_topo)
         self.label_corretas.pack(pady = (0, PADDING*4))
 
@@ -287,6 +290,15 @@ class Corretor():
                 contador_corretas += 1
         total = len(self.widgets_questoes)
         self.label_corretas.configure(text=f'Corretas: {contador_corretas} de {total}')
+        if contador_corretas == total:
+            self.botao_corrigir_todas.configure(style='Verde.TButton')
+        elif contador_corretas == 0:
+            self.botao_corrigir_todas.configure(style='Vermelho.TButton')
+        else:
+            self.botao_corrigir_todas.configure(style='Amarelo.TButton')
+        # Redesenha a interface
+        self.janela.update()
+        self.janela.update_idletasks()
 
 
 class QuestaoWidget(ttk.Frame):
@@ -348,6 +360,14 @@ class QuestaoWidget(ttk.Frame):
                 self.contador_corretas += 1
         texto_corretas = f'Corretas: {self.contador_corretas} de {len(self.widgets_correcoes)}'
         self.label_resultado.configure(text=f'{texto_corretas}')
+        estilo = 'TButton'
+        if self.contador_corretas == len(self.widgets_correcoes):
+            estilo = 'Verde.' + estilo
+        elif self.contador_corretas == 0:
+            estilo = 'Vermelho.' + estilo
+        else:
+            estilo = 'Amarelo.' + estilo
+        self.botao_corrigir.configure(style=estilo)
         self.janela_corretor.atualizar()
     
     @property
@@ -391,15 +411,19 @@ class CorrecaoWidget(ttk.Frame):
         altura = min(len(res.split('\n')), 20)  # Ajusta a altura
         text.configure(height=altura,
                        state=tk.DISABLED)  # Desabilita a edição
-        # Atualiza o label do resultado
+        # Atualiza o label do resultado e a cor do botão
+        estilo = 'TButton' # Começa com botão comum
         # Mesmo o código sendo 0, a saída precisa ser a esperada, então é necessário que erro seja None
-        self.resultado = 'Incorreta' if erro else 'Correta'
+        if erro:
+            self.resultado = 'Incorreta'
+            estilo = 'Vermelho.' + estilo
+        else:
+            self.resultado = 'Correta'
+            estilo = 'Verde.' + estilo
         self.label_resultado.configure(text=self.resultado)
+        self.botao_corrigir.configure(style=estilo)
         # Atualiza o widget da questão
         self.widget_questao.atualizar()
-        # Redesenha a interface
-        self.update()
-        self.update_idletasks()
     
     def _montar_primeira_linha(self):
         label = ttk.Label(self, text=f'Comando', style='H2.TLabel')
