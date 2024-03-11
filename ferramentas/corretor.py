@@ -110,6 +110,8 @@ class Correcao:
             _, erro = eval(self.func_expect)(resposta, self.args_expect)
         elif codigo == 2: # File not found
             erro = f'Arquivo {self.script} não encontrado.'
+        else:
+            erro = f'Erro ({codigo}) desconhecido.'
         return codigo, resposta, erro
 
 
